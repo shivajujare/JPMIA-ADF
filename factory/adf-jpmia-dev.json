@@ -1,0 +1,9 @@
+{
+	"name": "adf-jpmia-dev",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "58ea469c-09d2-4fbe-b0b9-1ca83ea5a38a",
+		"tenantId": "ba1b0bed-5b3e-4a44-8262-436ffcfc847d"
+	}
+}
