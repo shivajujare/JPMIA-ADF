@@ -1,0 +1,21 @@
+{
+	"name": "AzureDataLakeStorage1",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://adlsjpmiadev.dfs.core.windows.net/",
+			"tenant": "ba1b0bed-5b3e-4a44-8262-436ffcfc847d",
+			"servicePrincipalId": "4642e764-5d80-4e29-936b-59e06b8a16f4",
+			"servicePrincipalCredentialType": "ServicePrincipalKey",
+			"servicePrincipalCredential": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_kv_jpmia",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "sp-key"
+			}
+		}
+	}
+}
