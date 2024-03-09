@@ -31,9 +31,6 @@
 				}
 			],
 			"scriptLines": [
-				"parameters{",
-				"     df_filename as string",
-				"}",
 				"source(output(",
 				"          company_id as string,",
 				"          name as string,",

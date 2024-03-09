@@ -5,6 +5,8 @@
 			{
 				"name": "looping companie folder",
 				"type": "ForEach",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "get companies files",
@@ -80,6 +82,8 @@
 			{
 				"name": "get companies files",
 				"type": "GetMetadata",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",

@@ -5,11 +5,6 @@
 			"referenceName": "ls_adls_jpmia",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"ds_filename": {
-				"type": "String"
-			}
-		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
