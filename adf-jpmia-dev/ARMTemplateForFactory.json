@@ -71,8 +71,28 @@
 												}
 											},
 											"datasetParameters": {
-												"source1": {},
-												"sink1": {}
+												"source1": {
+													"ds_raw_filename": {
+														"value": "@item().name",
+														"type": "Expression"
+													}
+												},
+												"sink1": {
+													"ds_filename": {
+														"value": "@item().name",
+														"type": "Expression"
+													}
+												}
+											},
+											"linkedServiceParameters": {
+												"source1": {
+													"schemaLinkedService": {
+														"ds_raw_filename": {
+															"value": "@item().name",
+															"type": "Expression"
+														}
+													}
+												}
 											}
 										},
 										"staging": {},
@@ -100,7 +120,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataset": {
-								"referenceName": "ds_jpmia_raw_companies",
+								"referenceName": "ds_jpmia_raw_companies_folder",
 								"type": "DatasetReference",
 								"parameters": {}
 							},
@@ -124,12 +144,87 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_companies')]",
+				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_companies_folder')]",
 				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv')]"
 			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ds_jpmia_raw_companies')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_jpmia",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"ds_raw_filename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "companies.csv",
+						"folderPath": "companies",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "company_id",
+						"type": "String"
+					},
+					{
+						"name": "name",
+						"type": "String"
+					},
+					{
+						"name": "description",
+						"type": "String"
+					},
+					{
+						"name": "company_size",
+						"type": "String"
+					},
+					{
+						"name": "state",
+						"type": "String"
+					},
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "zip_code",
+						"type": "String"
+					},
+					{
+						"name": "address",
+						"type": "String"
+					},
+					{
+						"name": "url",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls_jpmia')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_jpmia_raw_companies_folder')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -206,11 +301,17 @@
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"ds_filename": {
+						"type": "String"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
+						"fileName": "companies.csv",
 						"folderPath": "source_view",
 						"fileSystem": "jpmia"
 					},
@@ -359,8 +460,8 @@
 						"     partitionBy('hash', 1)) ~> source1",
 						"source1 derive(ingestion_date = currentUTC()) ~> derivedColumn1",
 						"derivedColumn1 sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     partitionFileNames:[($df_filename)],",
+						"     validateSchema: true,",
+						"     partitionFileNames:['companies.csv'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
