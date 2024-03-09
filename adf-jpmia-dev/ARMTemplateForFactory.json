@@ -33,8 +33,6 @@
 					{
 						"name": "looping companie folder",
 						"type": "ForEach",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "get companies files",
@@ -68,19 +66,20 @@
 											"type": "DataFlowReference",
 											"parameters": {},
 											"datasetParameters": {
-												"source1": {},
-												"sink1": {}
-											},
-											"linkedServiceParameters": {
 												"source1": {
-													"schemaLinkedService": {
-														"ds_raw_filename": {
-															"value": "@item().name",
-															"type": "Expression"
-														}
+													"raw_filename": {
+														"value": "@item().name",
+														"type": "Expression"
+													}
+												},
+												"sink1": {
+													"sv_filename": {
+														"value": "@item().name",
+														"type": "Expression"
 													}
 												}
-											}
+											},
+											"linkedServiceParameters": {}
 										},
 										"staging": {},
 										"compute": {
@@ -96,8 +95,6 @@
 					{
 						"name": "get companies files",
 						"type": "GetMetadata",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -146,6 +143,8 @@
 					{
 						"name": "Data flow1",
 						"type": "ExecuteDataFlow",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -192,12 +191,20 @@
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"raw_filename": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "companies.csv",
+						"fileName": {
+							"value": "@dataset().raw_filename",
+							"type": "Expression"
+						},
 						"folderPath": "companies",
 						"fileSystem": "raw"
 					},
@@ -331,12 +338,20 @@
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"sv_filename": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "companies.csv",
+						"fileName": {
+							"value": "@dataset().sv_filename",
+							"type": "Expression"
+						},
 						"folderPath": "source_view",
 						"fileSystem": "jpmia"
 					},
