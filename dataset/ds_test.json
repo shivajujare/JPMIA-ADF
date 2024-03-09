@@ -1,0 +1,23 @@
+{
+	"name": "ds_test",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adls_jpmia",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "source_view",
+				"fileSystem": "jpmia"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
