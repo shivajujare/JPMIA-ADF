@@ -37,18 +37,10 @@
 								"dataflow": {
 									"referenceName": "df_jpmia_srv",
 									"type": "DataFlowReference",
-									"datasetParameters": {
-										"source1": {
-											"raw_filename": {
-												"value": "@item().name",
-												"type": "Expression"
-											}
-										},
-										"sink1": {
-											"sv_filename": {
-												"value": "@item().name",
-												"type": "Expression"
-											}
+									"parameters": {
+										"df_fname": {
+											"value": "'@{item().name}'",
+											"type": "Expression"
 										}
 									}
 								},

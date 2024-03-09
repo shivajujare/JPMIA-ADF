@@ -5,21 +5,11 @@
 			"referenceName": "ls_adls_jpmia",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"raw_filename": {
-				"type": "string"
-			}
-		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": {
-					"value": "@dataset().raw_filename",
-					"type": "Expression"
-				},
-				"folderPath": "companies",
 				"fileSystem": "raw"
 			},
 			"columnDelimiter": ",",
