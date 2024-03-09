@@ -41,6 +41,30 @@
 											"value": "'@{item().name}'",
 											"type": "Expression"
 										}
+									},
+									"datasetParameters": {
+										"source1": {
+											"ds_raw_filename": {
+												"value": "@item().name",
+												"type": "Expression"
+											}
+										},
+										"sink1": {
+											"ds_filename": {
+												"value": "@item().name",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceParameters": {
+										"source1": {
+											"schemaLinkedService": {
+												"ds_raw_filename": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										}
 									}
 								},
 								"compute": {
@@ -67,7 +91,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "ds_jpmia_raw_companies",
+						"referenceName": "ds_jpmia_raw_companies_folder",
 						"type": "DatasetReference"
 					},
 					"fieldList": [
@@ -75,6 +99,7 @@
 					],
 					"storeSettings": {
 						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {

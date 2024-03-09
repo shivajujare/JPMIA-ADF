@@ -1,21 +1,15 @@
 {
-	"name": "ds_jpmia_raw_companies",
+	"name": "ds_jpmia_raw_companies_folder",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_adls_jpmia",
 			"type": "LinkedServiceReference"
-		},
-		"parameters": {
-			"ds_raw_filename": {
-				"type": "string"
-			}
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "companies.csv",
 				"folderPath": "companies",
 				"fileSystem": "raw"
 			},
