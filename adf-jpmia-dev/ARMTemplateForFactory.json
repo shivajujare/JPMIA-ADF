@@ -33,6 +33,8 @@
 					{
 						"name": "looping companie folder",
 						"type": "ForEach",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "get companies files",
@@ -64,25 +66,10 @@
 										"dataflow": {
 											"referenceName": "df_jpmia_srv",
 											"type": "DataFlowReference",
-											"parameters": {
-												"df_filename": {
-													"value": "'@{item().name}'",
-													"type": "Expression"
-												}
-											},
+											"parameters": {},
 											"datasetParameters": {
-												"source1": {
-													"ds_raw_filename": {
-														"value": "@item().name",
-														"type": "Expression"
-													}
-												},
-												"sink1": {
-													"ds_filename": {
-														"value": "@item().name",
-														"type": "Expression"
-													}
-												}
+												"source1": {},
+												"sink1": {}
 											},
 											"linkedServiceParameters": {
 												"source1": {
@@ -109,6 +96,8 @@
 					{
 						"name": "get companies files",
 						"type": "GetMetadata",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -149,6 +138,52 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_jpmia_srv",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ds_jpmia_raw_companies')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -156,11 +191,6 @@
 				"linkedServiceName": {
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"ds_raw_filename": {
-						"type": "string"
-					}
 				},
 				"annotations": [],
 				"type": "DelimitedText",
@@ -301,11 +331,6 @@
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
 				},
-				"parameters": {
-					"ds_filename": {
-						"type": "String"
-					}
-				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
@@ -437,9 +462,6 @@
 						}
 					],
 					"scriptLines": [
-						"parameters{",
-						"     df_filename as string",
-						"}",
 						"source(output(",
 						"          company_id as string,",
 						"          name as string,",
