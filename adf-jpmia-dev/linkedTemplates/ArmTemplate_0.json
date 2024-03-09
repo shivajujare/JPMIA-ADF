@@ -69,7 +69,7 @@
 						"fileSystem": "raw"
 					},
 					"columnDelimiter": ",",
-					"escapeChar": "\\",
+					"escapeChar": "\"",
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
@@ -208,7 +208,7 @@
 						"fileSystem": "jpmia"
 					},
 					"columnDelimiter": ",",
-					"escapeChar": "\\",
+					"escapeChar": "\"",
 					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
