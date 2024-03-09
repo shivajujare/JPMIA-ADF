@@ -330,7 +330,6 @@
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     quoteAll: true,",
 						"     mapColumn(",
 						"          company_id,",
 						"          name,",
