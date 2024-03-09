@@ -277,7 +277,7 @@
 						"     validateSchema: false,",
 						"     ignoreNoFilesFound: false,",
 						"     multiLineRow: true,",
-						"     wildcardPaths:[(concat('companies', $df_fname))],",
+						"     wildcardPaths:[(concat('companies/', $df_fname))],",
 						"     partitionBy('hash', 1)) ~> source1",
 						"source1 derive(ingestion_date = currentUTC()) ~> derivedColumn1",
 						"derivedColumn1 sink(allowSchemaDrift: true,",
