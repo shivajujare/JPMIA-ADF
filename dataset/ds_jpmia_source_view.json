@@ -15,7 +15,7 @@
 				"fileSystem": "jpmia"
 			},
 			"columnDelimiter": ",",
-			"escapeChar": "",
+			"escapeChar": "\"",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
