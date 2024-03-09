@@ -1,0 +1,10 @@
+{
+	"name": "ls_adls_jpmia",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://adlsjpmiadev.dfs.core.windows.net/"
+		}
+	}
+}
