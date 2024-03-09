@@ -38,7 +38,7 @@
 									"type": "DataFlowReference",
 									"parameters": {
 										"df_filename": {
-											"value": "'@{item()}'",
+											"value": "'@{item().name}'",
 											"type": "Expression"
 										}
 									}
