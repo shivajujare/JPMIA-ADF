@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "df_jpmia_srv",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {

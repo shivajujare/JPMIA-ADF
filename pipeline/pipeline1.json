@@ -34,8 +34,14 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataflow": {
-									"referenceName": "dataflow1",
-									"type": "DataFlowReference"
+									"referenceName": "df_jpmia_srv",
+									"type": "DataFlowReference",
+									"parameters": {
+										"df_filename": {
+											"value": "'@{item()}'",
+											"type": "Expression"
+										}
+									}
 								},
 								"compute": {
 									"coreCount": 8,
