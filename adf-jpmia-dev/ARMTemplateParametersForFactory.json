@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-jpmia-dev"
+		},
+		"ls_adls_jpmia_properties_typeProperties_url": {
+			"value": "https://adlsjpmiadev.dfs.core.windows.net/"
+		},
+		"ls_kv_jpmia_properties_typeProperties_baseUrl": {
+			"value": "https://kv-jpmia-dev.vault.azure.net/"
+		},
+		"ls_referentials_properties_typeProperties_connectionString_secretName": {
+			"value": "sql-referential-con-str"
+		}
+	}
+}
