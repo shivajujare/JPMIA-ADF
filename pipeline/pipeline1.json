@@ -5,8 +5,6 @@
 			{
 				"name": "looping companie folder",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "get companies files",
@@ -38,33 +36,17 @@
 								"dataflow": {
 									"referenceName": "df_jpmia_srv",
 									"type": "DataFlowReference",
-									"parameters": {
-										"df_filename": {
-											"value": "'@{item().name}'",
-											"type": "Expression"
-										}
-									},
 									"datasetParameters": {
 										"source1": {
-											"ds_raw_filename": {
+											"raw_filename": {
 												"value": "@item().name",
 												"type": "Expression"
 											}
 										},
 										"sink1": {
-											"ds_filename": {
+											"sv_filename": {
 												"value": "@item().name",
 												"type": "Expression"
-											}
-										}
-									},
-									"linkedServiceParameters": {
-										"source1": {
-											"schemaLinkedService": {
-												"ds_raw_filename": {
-													"value": "@item().name",
-													"type": "Expression"
-												}
 											}
 										}
 									}
@@ -82,8 +64,6 @@
 			{
 				"name": "get companies files",
 				"type": "GetMetadata",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
