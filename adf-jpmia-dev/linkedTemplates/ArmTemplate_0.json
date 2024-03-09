@@ -139,7 +139,7 @@
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
 					"firstRowAsHeader": true,
-					"quoteChar": "\""
+					"quoteChar": "'"
 				},
 				"schema": []
 			},
@@ -262,6 +262,20 @@
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
+						"     quoteAll: true,",
+						"     mapColumn(",
+						"          company_id,",
+						"          name,",
+						"          description,",
+						"          company_size,",
+						"          state,",
+						"          country,",
+						"          city,",
+						"          zip_code,",
+						"          address,",
+						"          url,",
+						"          ingestion_date",
+						"     ),",
 						"     partitionBy('hash', 1)) ~> sink1"
 					]
 				}
