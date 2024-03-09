@@ -65,20 +65,15 @@
 										"dataflow": {
 											"referenceName": "df_jpmia_srv",
 											"type": "DataFlowReference",
-											"parameters": {},
-											"datasetParameters": {
-												"source1": {
-													"raw_filename": {
-														"value": "@item().name",
-														"type": "Expression"
-													}
-												},
-												"sink1": {
-													"sv_filename": {
-														"value": "@item().name",
-														"type": "Expression"
-													}
+											"parameters": {
+												"df_fname": {
+													"value": "'@{item().name}'",
+													"type": "Expression"
 												}
+											},
+											"datasetParameters": {
+												"source1": {},
+												"sink1": {}
 											}
 										},
 										"staging": {},
@@ -191,21 +186,11 @@
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
 				},
-				"parameters": {
-					"raw_filename": {
-						"type": "string"
-					}
-				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().raw_filename",
-							"type": "Expression"
-						},
-						"folderPath": "companies",
 						"fileSystem": "raw"
 					},
 					"columnDelimiter": ",",
@@ -297,21 +282,11 @@
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
 				},
-				"parameters": {
-					"sv_filename": {
-						"type": "string"
-					}
-				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().sv_filename",
-							"type": "Expression"
-						},
-						"folderPath": "source_view",
 						"fileSystem": "jpmia"
 					},
 					"columnDelimiter": ",",
@@ -436,6 +411,9 @@
 						}
 					],
 					"scriptLines": [
+						"parameters{",
+						"     df_fname as string",
+						"}",
 						"source(output(",
 						"          company_id as string,",
 						"          name as string,",
@@ -450,14 +428,14 @@
 						"     ),",
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     inferDriftedColumnTypes: true,",
 						"     ignoreNoFilesFound: false,",
 						"     multiLineRow: true,",
+						"     wildcardPaths:[(concat('companies', $df_fname))],",
 						"     partitionBy('hash', 1)) ~> source1",
 						"source1 derive(ingestion_date = currentUTC()) ~> derivedColumn1",
 						"derivedColumn1 sink(allowSchemaDrift: true,",
 						"     validateSchema: true,",
-						"     partitionFileNames:['companies.csv'],",
+						"     partitionFileNames:[($df_fname)],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
