@@ -68,7 +68,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "ds_jpmia_raw_companies_folder",
+						"referenceName": "ds_jpmia_raw_jobs_folder",
 						"type": "DatasetReference"
 					},
 					"fieldList": [
