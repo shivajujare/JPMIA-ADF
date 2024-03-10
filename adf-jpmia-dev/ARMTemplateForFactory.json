@@ -25,7 +25,7 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"name": "[concat(parameters('factoryName'), '/pl_srv_companies')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -63,7 +63,7 @@
 									"userProperties": [],
 									"typeProperties": {
 										"dataflow": {
-											"referenceName": "df_jpmia_srv",
+											"referenceName": "df_jpmia_srv_companies",
 											"type": "DataFlowReference",
 											"parameters": {
 												"df_fname": {
@@ -131,7 +131,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_companies_folder')]",
-				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv')]"
+				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv_companies')]"
 			]
 		},
 		{
@@ -156,7 +156,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataflow": {
-								"referenceName": "df_jpmia_srv",
+								"referenceName": "df_jpmia_srv_companies",
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
@@ -179,7 +179,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv')]"
+				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv_companies')]"
 			]
 		},
 		{
@@ -386,7 +386,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/df_jpmia_srv')]",
+			"name": "[concat(parameters('factoryName'), '/df_jpmia_srv_companies')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -441,6 +441,246 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_companies')]",
 				"[concat(variables('factoryId'), '/datasets/ds_jpmia_source_view')]",
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls_jpmia')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_jpmia_srv_jobs')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_jpmia_raw_companies",
+								"type": "DatasetReference"
+							},
+							"name": "rawJobFiles",
+							"description": "Import data from ds_jpmia_raw_jobs"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_jpmia_source_view",
+								"type": "DatasetReference"
+							},
+							"name": "sink1",
+							"rejectedDataLinkedService": {
+								"referenceName": "ls_adls_jpmia",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"parameters{",
+						"     df_fname as string",
+						"}",
+						"source(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
+						"     ignoreNoFilesFound: false,",
+						"     multiLineRow: true,",
+						"     wildcardPaths:[(concat('jobs/', $df_fname))],",
+						"     partitionBy('hash', 1)) ~> rawJobFiles",
+						"rawJobFiles sink(allowSchemaDrift: true,",
+						"     validateSchema: true,",
+						"     partitionFileNames:[($df_fname)],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_companies')]",
+				"[concat(variables('factoryId'), '/datasets/ds_jpmia_source_view')]",
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls_jpmia')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_srv_jobs')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "looping job folder",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "get job files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('get job files').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Data flow1",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "df_jpmia_srv_jobs",
+											"type": "DataFlowReference",
+											"parameters": {
+												"df_fname": {
+													"value": "'@{item().name}'",
+													"type": "Expression"
+												}
+											},
+											"datasetParameters": {
+												"rawJobFiles": {},
+												"sink1": {}
+											},
+											"linkedServiceParameters": {}
+										},
+										"staging": {},
+										"compute": {
+											"coreCount": 8,
+											"computeType": "General"
+										},
+										"traceLevel": "Fine"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "get job files",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_jpmia_raw_jobs_folder",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"sss": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_jobs_folder')]",
+				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv_jobs')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_jpmia_raw_jobs_folder')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_jpmia",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "jobs",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "company_id",
+						"type": "String"
+					},
+					{
+						"name": "name",
+						"type": "String"
+					},
+					{
+						"name": "description",
+						"type": "String"
+					},
+					{
+						"name": "company_size",
+						"type": "String"
+					},
+					{
+						"name": "state",
+						"type": "String"
+					},
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "zip_code",
+						"type": "String"
+					},
+					{
+						"name": "address",
+						"type": "String"
+					},
+					{
+						"name": "url",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_adls_jpmia')]"
 			]
 		}
