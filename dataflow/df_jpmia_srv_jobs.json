@@ -1,5 +1,5 @@
 {
-	"name": "df_jpmia_srv_companies",
+	"name": "df_jpmia_srv_jobs",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {

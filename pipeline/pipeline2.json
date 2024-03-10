@@ -18,7 +18,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_jpmia_srv",
+						"referenceName": "df_jpmia_srv_companies",
 						"type": "DataFlowReference"
 					},
 					"compute": {
