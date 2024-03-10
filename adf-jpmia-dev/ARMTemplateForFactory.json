@@ -80,14 +80,8 @@
 											},
 											"datasetParameters": {
 												"rawCompaniesFiles": {},
-												"sink1": {
-													"current_date": {
-														"value": "@variables('sss')",
-														"type": "Expression"
-													}
-												}
-											},
-											"linkedServiceParameters": {}
+												"sink1": {}
+											}
 										},
 										"staging": {},
 										"compute": {
@@ -317,18 +311,13 @@
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
 				},
-				"parameters": {
-					"current_date": {
-						"type": "string"
-					}
-				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": {
-							"value": "@dataset().current_date",
+							"value": "@concat('source_view/',utcnow('d'))",
 							"type": "Expression"
 						},
 						"fileSystem": "jpmia"
