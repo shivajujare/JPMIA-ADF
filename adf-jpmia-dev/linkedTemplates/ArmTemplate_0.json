@@ -253,23 +253,19 @@
 							}
 						}
 					],
-					"transformations": [
-						{
-							"name": "derivedColumn1"
-						}
-					],
+					"transformations": [],
 					"scriptLines": [
 						"parameters{",
 						"     df_fname as string",
 						"}",
 						"source(allowSchemaDrift: true,",
 						"     validateSchema: false,",
+						"     inferDriftedColumnTypes: true,",
 						"     ignoreNoFilesFound: false,",
 						"     multiLineRow: true,",
 						"     wildcardPaths:[(concat('companies/', $df_fname))],",
 						"     partitionBy('hash', 1)) ~> rawCompaniesFiles",
-						"rawCompaniesFiles derive(ingestion_date = currentUTC()) ~> derivedColumn1",
-						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"rawCompaniesFiles sink(allowSchemaDrift: true,",
 						"     validateSchema: true,",
 						"     partitionFileNames:[($df_fname)],",
 						"     umask: 0022,",
@@ -277,9 +273,6 @@
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     mapColumn(",
-						"          ingestion_date",
-						"     ),",
 						"     partitionBy('hash', 1)) ~> sink1"
 					]
 				}
