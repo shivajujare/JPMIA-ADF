@@ -237,7 +237,7 @@
 								"referenceName": "ds_jpmia_raw_companies",
 								"type": "DatasetReference"
 							},
-							"name": "source1"
+							"name": "rawCompaniesFiles"
 						}
 					],
 					"sinks": [
@@ -262,25 +262,13 @@
 						"parameters{",
 						"     df_fname as string",
 						"}",
-						"source(output(",
-						"          company_id as string,",
-						"          name as string,",
-						"          description as string,",
-						"          company_size as string,",
-						"          state as string,",
-						"          country as string,",
-						"          city as string,",
-						"          zip_code as string,",
-						"          address as string,",
-						"          url as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
+						"source(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     ignoreNoFilesFound: false,",
 						"     multiLineRow: true,",
 						"     wildcardPaths:[(concat('companies/', $df_fname))],",
-						"     partitionBy('hash', 1)) ~> source1",
-						"source1 derive(ingestion_date = currentUTC()) ~> derivedColumn1",
+						"     partitionBy('hash', 1)) ~> rawCompaniesFiles",
+						"rawCompaniesFiles derive(ingestion_date = currentUTC()) ~> derivedColumn1",
 						"derivedColumn1 sink(allowSchemaDrift: true,",
 						"     validateSchema: true,",
 						"     partitionFileNames:[($df_fname)],",
@@ -290,16 +278,6 @@
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
 						"     mapColumn(",
-						"          company_id,",
-						"          name,",
-						"          description,",
-						"          company_size,",
-						"          state,",
-						"          country,",
-						"          city,",
-						"          zip_code,",
-						"          address,",
-						"          url,",
 						"          ingestion_date",
 						"     ),",
 						"     partitionBy('hash', 1)) ~> sink1"
@@ -360,7 +338,7 @@
 												}
 											},
 											"datasetParameters": {
-												"source1": {},
+												"rawCompaniesFiles": {},
 												"sink1": {}
 											}
 										},
@@ -443,7 +421,7 @@
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"source1": {},
+									"rawCompaniesFiles": {},
 									"sink1": {}
 								}
 							},
