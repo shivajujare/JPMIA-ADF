@@ -627,54 +627,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Data flow1",
-						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "df_jpmia_srv_companies",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"rawCompaniesFiles": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv_companies')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/pl_srv_companies')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -782,6 +734,60 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_companies_folder')]",
 				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv_companies')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_srv_job_postings')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "load Job Postings",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_srv_postings",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"contractPostings": {},
+									"fullTimeJobPostings": {},
+									"internshipJobPostings": {},
+									"otherJobPostings": {},
+									"jobPostings": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"sss": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_srv_postings')]"
 			]
 		},
 		{
@@ -895,57 +901,86 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pl_srv_job_postings')]",
+			"name": "[concat(parameters('factoryName'), '/ps_srv_maiin')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "load Job Postings",
-						"type": "ExecuteDataFlow",
+						"name": "Execute srv companies",
+						"type": "ExecutePipeline",
 						"dependsOn": [],
 						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
 							"secureInput": false
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"dataflow": {
-								"referenceName": "df_srv_postings",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"contractPostings": {},
-									"fullTimeJobPostings": {},
-									"internshipJobPostings": {},
-									"otherJobPostings": {},
-									"jobPostings": {}
-								}
+							"pipeline": {
+								"referenceName": "pl_srv_companies",
+								"type": "PipelineReference"
 							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute srv jobs",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute srv companies",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_srv_jobs",
+								"type": "PipelineReference"
 							},
-							"traceLevel": "Fine"
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute srv postiings",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute srv jobs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_srv_job_postings",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
 						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
-				"variables": {
-					"sss": {
-						"type": "String"
-					}
-				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_srv_postings')]"
+				"[concat(variables('factoryId'), '/pipelines/pl_srv_companies')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_srv_jobs')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_srv_job_postings')]"
 			]
 		}
 	]
