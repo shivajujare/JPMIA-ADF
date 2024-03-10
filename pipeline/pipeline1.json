@@ -49,14 +49,6 @@
 											"value": "'@{item().name}'",
 											"type": "Expression"
 										}
-									},
-									"datasetParameters": {
-										"sink1": {
-											"current_date": {
-												"value": "@variables('sss')",
-												"type": "Expression"
-											}
-										}
 									}
 								},
 								"compute": {
