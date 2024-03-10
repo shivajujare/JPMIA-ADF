@@ -5,12 +5,20 @@
 			"referenceName": "ls_adls_jpmia",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"current_date": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": "source_view",
+				"folderPath": {
+					"value": "@dataset().current_date",
+					"type": "Expression"
+				},
 				"fileSystem": "jpmia"
 			},
 			"columnDelimiter": ",",
