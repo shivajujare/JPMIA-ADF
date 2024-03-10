@@ -317,7 +317,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": {
-							"value": "@concat('source_view/',utcnow('d'))",
+							"value": "@concat('source_view/',replace(utcnow('d'),'/','-'))",
 							"type": "Expression"
 						},
 						"fileSystem": "jpmia"
