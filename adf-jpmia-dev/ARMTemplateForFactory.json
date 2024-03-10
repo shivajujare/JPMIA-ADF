@@ -25,6 +25,54 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_jpmia_srv_companies",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"rawCompaniesFiles": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv_companies')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pl_srv_companies')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -135,16 +183,71 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
+			"name": "[concat(parameters('factoryName'), '/pl_srv_jobs')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Data flow1",
-						"type": "ExecuteDataFlow",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
+						"name": "looping job folder",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "get job files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('get job files').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Data flow1",
+									"type": "ExecuteDataFlow",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataflow": {
+											"referenceName": "df_jpmia_srv_jobs",
+											"type": "DataFlowReference",
+											"parameters": {
+												"df_fname": {
+													"value": "'@{item().name}'",
+													"type": "Expression"
+												}
+											},
+											"datasetParameters": {
+												"rawJobFiles": {},
+												"sink1": {}
+											}
+										},
+										"staging": {},
+										"compute": {
+											"coreCount": 8,
+											"computeType": "General"
+										},
+										"traceLevel": "Fine"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "get job files",
+						"type": "GetMetadata",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -155,31 +258,38 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"dataflow": {
-								"referenceName": "df_jpmia_srv_companies",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"rawCompaniesFiles": {},
-									"sink1": {}
-								}
+							"dataset": {
+								"referenceName": "ds_jpmia_raw_jobs_folder",
+								"type": "DatasetReference",
+								"parameters": {}
 							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
 							},
-							"traceLevel": "Fine"
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
 						}
 					}
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"variables": {
+					"sss": {
+						"type": "String"
+					}
+				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv_companies')]"
+				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_jobs_folder')]",
+				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv_jobs')]"
 			]
 		},
 		{
@@ -224,6 +334,75 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": "companies",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "company_id",
+						"type": "String"
+					},
+					{
+						"name": "name",
+						"type": "String"
+					},
+					{
+						"name": "description",
+						"type": "String"
+					},
+					{
+						"name": "company_size",
+						"type": "String"
+					},
+					{
+						"name": "state",
+						"type": "String"
+					},
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "zip_code",
+						"type": "String"
+					},
+					{
+						"name": "address",
+						"type": "String"
+					},
+					{
+						"name": "url",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls_jpmia')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_jpmia_raw_jobs_folder')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_jpmia",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "jobs",
 						"fileSystem": "raw"
 					},
 					"columnDelimiter": ",",
@@ -505,72 +684,14 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pl_srv_jobs')]",
+			"name": "[concat(parameters('factoryName'), '/pl_srv_job_postings')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "looping job folder",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "get job files",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('get job files').output.childItems",
-								"type": "Expression"
-							},
-							"isSequential": true,
-							"activities": [
-								{
-									"name": "Data flow1",
-									"type": "ExecuteDataFlow",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataflow": {
-											"referenceName": "df_jpmia_srv_jobs",
-											"type": "DataFlowReference",
-											"parameters": {
-												"df_fname": {
-													"value": "'@{item().name}'",
-													"type": "Expression"
-												}
-											},
-											"datasetParameters": {
-												"rawJobFiles": {},
-												"sink1": {}
-											},
-											"linkedServiceParameters": {}
-										},
-										"staging": {},
-										"compute": {
-											"coreCount": 8,
-											"computeType": "General"
-										},
-										"traceLevel": "Fine"
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "get job files",
-						"type": "GetMetadata",
+						"name": "load Job Postings",
+						"type": "ExecuteDataFlow",
 						"dependsOn": [],
 						"policy": {
 							"timeout": "0.12:00:00",
@@ -581,22 +702,24 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"dataset": {
-								"referenceName": "ds_jpmia_raw_jobs_folder",
-								"type": "DatasetReference",
-								"parameters": {}
+							"dataflow": {
+								"referenceName": "df_srv_postings",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"contractPostings": {},
+									"fullTimeJobPostings": {},
+									"internshipJobPostings": {},
+									"otherJobPostings": {},
+									"jobPostings": {}
+								}
 							},
-							"fieldList": [
-								"childItems"
-							],
-							"storeSettings": {
-								"type": "AzureBlobFSReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
 							},
-							"formatSettings": {
-								"type": "DelimitedTextReadSettings"
-							}
+							"traceLevel": "Fine"
 						}
 					}
 				],
@@ -611,77 +734,218 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_jobs_folder')]",
-				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv_jobs')]"
+				"[concat(variables('factoryId'), '/dataflows/df_srv_postings')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ds_jpmia_raw_jobs_folder')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
+			"name": "[concat(parameters('factoryName'), '/df_srv_postings')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_adls_jpmia",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
+				"type": "MappingDataFlow",
 				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"folderPath": "jobs",
-						"fileSystem": "raw"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "company_id",
-						"type": "String"
-					},
-					{
-						"name": "name",
-						"type": "String"
-					},
-					{
-						"name": "description",
-						"type": "String"
-					},
-					{
-						"name": "company_size",
-						"type": "String"
-					},
-					{
-						"name": "state",
-						"type": "String"
-					},
-					{
-						"name": "country",
-						"type": "String"
-					},
-					{
-						"name": "city",
-						"type": "String"
-					},
-					{
-						"name": "zip_code",
-						"type": "String"
-					},
-					{
-						"name": "address",
-						"type": "String"
-					},
-					{
-						"name": "url",
-						"type": "String"
-					}
-				]
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_jpmia_raw_companies",
+								"type": "DatasetReference"
+							},
+							"name": "contractPostings"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_jpmia_raw_companies",
+								"type": "DatasetReference"
+							},
+							"name": "fullTimeJobPostings"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_jpmia_raw_companies",
+								"type": "DatasetReference"
+							},
+							"name": "internshipJobPostings"
+						},
+						{
+							"dataset": {
+								"referenceName": "ds_jpmia_raw_companies",
+								"type": "DatasetReference"
+							},
+							"name": "otherJobPostings"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "ds_jpmia_source_view",
+								"type": "DatasetReference"
+							},
+							"name": "jobPostings"
+						}
+					],
+					"transformations": [
+						{
+							"name": "combineSources"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          job_id as string,",
+						"          company_id as string,",
+						"          title as string,",
+						"          description as string,",
+						"          max_salary as string,",
+						"          med_salary as string,",
+						"          min_salary as string,",
+						"          pay_period as string,",
+						"          formatted_work_type as string,",
+						"          location as string,",
+						"          applies as string,",
+						"          original_listed_time as string,",
+						"          remote_allowed as string,",
+						"          views as string,",
+						"          job_posting_url as string,",
+						"          application_url as string,",
+						"          application_type as string,",
+						"          expiry as string,",
+						"          closed_time as string,",
+						"          formatted_experience_level as string,",
+						"          skills_desc as string,",
+						"          listed_time as string,",
+						"          posting_domain as string,",
+						"          sponsored as string,",
+						"          work_type as string,",
+						"          currency as string,",
+						"          compensation_type as string,",
+						"          scraped as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     multiLineRow: true,",
+						"     wildcardPaths:[(concat('postings/', 'contract_job_postings.csv'))]) ~> contractPostings",
+						"source(output(",
+						"          job_id as string,",
+						"          company_id as string,",
+						"          title as string,",
+						"          description as string,",
+						"          max_salary as string,",
+						"          med_salary as string,",
+						"          min_salary as string,",
+						"          pay_period as string,",
+						"          formatted_work_type as string,",
+						"          location as string,",
+						"          applies as string,",
+						"          original_listed_time as string,",
+						"          remote_allowed as string,",
+						"          views as string,",
+						"          job_posting_url as string,",
+						"          application_url as string,",
+						"          application_type as string,",
+						"          expiry as string,",
+						"          closed_time as string,",
+						"          formatted_experience_level as string,",
+						"          skills_desc as string,",
+						"          listed_time as string,",
+						"          posting_domain as string,",
+						"          sponsored as string,",
+						"          work_type as string,",
+						"          currency as string,",
+						"          compensation_type as string,",
+						"          scraped as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     multiLineRow: true,",
+						"     wildcardPaths:[(concat('postings/', 'full_time_job_postings.csv'))]) ~> fullTimeJobPostings",
+						"source(output(",
+						"          job_id as string,",
+						"          company_id as string,",
+						"          title as string,",
+						"          description as string,",
+						"          max_salary as string,",
+						"          med_salary as string,",
+						"          min_salary as string,",
+						"          pay_period as string,",
+						"          formatted_work_type as string,",
+						"          location as string,",
+						"          applies as string,",
+						"          original_listed_time as string,",
+						"          remote_allowed as string,",
+						"          views as string,",
+						"          job_posting_url as string,",
+						"          application_url as string,",
+						"          application_type as string,",
+						"          expiry as string,",
+						"          closed_time as string,",
+						"          formatted_experience_level as string,",
+						"          skills_desc as string,",
+						"          listed_time as string,",
+						"          posting_domain as string,",
+						"          sponsored as string,",
+						"          work_type as string,",
+						"          currency as string,",
+						"          compensation_type as string,",
+						"          scraped as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     multiLineRow: true,",
+						"     wildcardPaths:[(concat('postings/', 'internship_job_postings.csv'))]) ~> internshipJobPostings",
+						"source(output(",
+						"          job_id as string,",
+						"          company_id as string,",
+						"          title as string,",
+						"          description as string,",
+						"          max_salary as string,",
+						"          med_salary as string,",
+						"          min_salary as string,",
+						"          pay_period as string,",
+						"          formatted_work_type as string,",
+						"          location as string,",
+						"          applies as string,",
+						"          original_listed_time as string,",
+						"          remote_allowed as string,",
+						"          views as string,",
+						"          job_posting_url as string,",
+						"          application_url as string,",
+						"          application_type as string,",
+						"          expiry as string,",
+						"          closed_time as string,",
+						"          formatted_experience_level as string,",
+						"          skills_desc as string,",
+						"          listed_time as string,",
+						"          posting_domain as string,",
+						"          sponsored as string,",
+						"          work_type as string,",
+						"          currency as string,",
+						"          compensation_type as string,",
+						"          scraped as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     multiLineRow: true,",
+						"     wildcardPaths:[(concat('postings/','other_job_postings.csv'))]) ~> otherJobPostings",
+						"contractPostings, fullTimeJobPostings, internshipJobPostings, otherJobPostings union(byName: true,",
+						"     partitionBy('hash', 1))~> combineSources",
+						"combineSources sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:['job_postings.csv'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> jobPostings"
+					]
+				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_adls_jpmia')]"
+				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_companies')]",
+				"[concat(variables('factoryId'), '/datasets/ds_jpmia_source_view')]"
 			]
 		}
 	]
