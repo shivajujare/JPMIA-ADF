@@ -1,31 +1,67 @@
 {
-	"name": "pipeline2",
+	"name": "ps_srv_maiin",
 	"properties": {
 		"activities": [
 			{
-				"name": "Data flow1",
-				"type": "ExecuteDataFlow",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
+				"name": "Execute srv companies",
+				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
 					"secureInput": false
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataflow": {
-						"referenceName": "df_jpmia_srv_companies",
-						"type": "DataFlowReference"
+					"pipeline": {
+						"referenceName": "pl_srv_companies",
+						"type": "PipelineReference"
 					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute srv jobs",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute srv companies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_srv_jobs",
+						"type": "PipelineReference"
 					},
-					"traceLevel": "Fine"
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute srv postiings",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute srv jobs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_srv_job_postings",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
 				}
 			}
 		],
