@@ -9,7 +9,8 @@
 						"referenceName": "ds_jpmia_raw_companies",
 						"type": "DatasetReference"
 					},
-					"name": "rawCompaniesFiles"
+					"name": "rawJobFiles",
+					"description": "Import data from ds_jpmia_raw_jobs"
 				}
 			],
 			"sinks": [
@@ -35,9 +36,9 @@
 				"     inferDriftedColumnTypes: true,",
 				"     ignoreNoFilesFound: false,",
 				"     multiLineRow: true,",
-				"     wildcardPaths:[(concat('companies/', $df_fname))],",
-				"     partitionBy('hash', 1)) ~> rawCompaniesFiles",
-				"rawCompaniesFiles sink(allowSchemaDrift: true,",
+				"     wildcardPaths:[(concat('jobs/', $df_fname))],",
+				"     partitionBy('hash', 1)) ~> rawJobFiles",
+				"rawJobFiles sink(allowSchemaDrift: true,",
 				"     validateSchema: true,",
 				"     partitionFileNames:[($df_fname)],",
 				"     umask: 0022,",

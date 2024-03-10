@@ -3,11 +3,11 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "looping companie folder",
+				"name": "looping job folder",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "get companies files",
+						"activity": "get job files",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('get companies files').output.childItems",
+						"value": "@activity('get job files').output.childItems",
 						"type": "Expression"
 					},
 					"isSequential": true,
@@ -35,7 +35,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataflow": {
-									"referenceName": "df_jpmia_srv_companies",
+									"referenceName": "df_jpmia_srv_jobs",
 									"type": "DataFlowReference",
 									"parameters": {
 										"df_fname": {
@@ -55,7 +55,7 @@
 				}
 			},
 			{
-				"name": "get companies files",
+				"name": "get job files",
 				"type": "GetMetadata",
 				"dependsOn": [],
 				"policy": {
