@@ -59,6 +59,9 @@
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "SRV_Datasets"
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
@@ -85,6 +88,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SRV_Datasets"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
@@ -155,6 +161,9 @@
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "SRV_Datasets"
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
@@ -223,6 +232,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SRV_Datasets"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
@@ -301,6 +313,9 @@
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"folder": {
+					"name": "SRV_Dataflows"
+				},
 				"type": "MappingDataFlow",
 				"typeProperties": {
 					"sources": [
@@ -360,6 +375,9 @@
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"folder": {
+					"name": "SRV_Dataflows"
+				},
 				"type": "MappingDataFlow",
 				"typeProperties": {
 					"sources": [
@@ -420,6 +438,9 @@
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"folder": {
+					"name": "SRV_Dataflows"
+				},
 				"type": "MappingDataFlow",
 				"typeProperties": {
 					"sources": [
@@ -729,6 +750,9 @@
 						"type": "String"
 					}
 				},
+				"folder": {
+					"name": "SRV_Pipeline"
+				},
 				"annotations": []
 			},
 			"dependsOn": [
@@ -783,6 +807,9 @@
 					"sss": {
 						"type": "String"
 					}
+				},
+				"folder": {
+					"name": "SRV_Pipeline"
 				},
 				"annotations": []
 			},
@@ -893,6 +920,9 @@
 						"type": "String"
 					}
 				},
+				"folder": {
+					"name": "SRV_Pipeline"
+				},
 				"annotations": []
 			},
 			"dependsOn": [
@@ -974,6 +1004,9 @@
 				],
 				"policy": {
 					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "SRV_Pipeline"
 				},
 				"annotations": []
 			},

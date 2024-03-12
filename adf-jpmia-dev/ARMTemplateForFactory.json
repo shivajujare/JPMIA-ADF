@@ -25,89 +25,6 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/ps_srv_maiin')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Execute srv companies",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "pl_srv_companies",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Execute srv jobs",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Execute srv companies",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "pl_srv_jobs",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Execute srv postiings",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Execute srv jobs",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "pl_srv_job_postings",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/pl_srv_companies')]",
-				"[concat(variables('factoryId'), '/pipelines/pl_srv_jobs')]",
-				"[concat(variables('factoryId'), '/pipelines/pl_srv_job_postings')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/pl_srv_companies')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -210,6 +127,9 @@
 						"type": "String"
 					}
 				},
+				"folder": {
+					"name": "SRV_Pipeline"
+				},
 				"annotations": []
 			},
 			"dependsOn": [
@@ -264,6 +184,9 @@
 					"sss": {
 						"type": "String"
 					}
+				},
+				"folder": {
+					"name": "SRV_Pipeline"
 				},
 				"annotations": []
 			},
@@ -374,11 +297,100 @@
 						"type": "String"
 					}
 				},
+				"folder": {
+					"name": "SRV_Pipeline"
+				},
 				"annotations": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_jobs_folder')]",
 				"[concat(variables('factoryId'), '/dataflows/df_jpmia_srv_jobs')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ps_srv_maiin')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute srv companies",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_srv_companies",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute srv jobs",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute srv companies",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_srv_jobs",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute srv postiings",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute srv jobs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_srv_job_postings",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "SRV_Pipeline"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_srv_companies')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_srv_jobs')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_srv_job_postings')]"
 			]
 		},
 		{
@@ -389,6 +401,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SRV_Datasets"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
@@ -416,6 +431,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SRV_Datasets"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
@@ -486,6 +504,9 @@
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "SRV_Datasets"
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
@@ -554,6 +575,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SRV_Datasets"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
@@ -658,6 +682,9 @@
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"folder": {
+					"name": "SRV_Dataflows"
+				},
 				"type": "MappingDataFlow",
 				"typeProperties": {
 					"sources": [
@@ -717,6 +744,9 @@
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"folder": {
+					"name": "SRV_Dataflows"
+				},
 				"type": "MappingDataFlow",
 				"typeProperties": {
 					"sources": [
@@ -777,6 +807,9 @@
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
+				"folder": {
+					"name": "SRV_Dataflows"
+				},
 				"type": "MappingDataFlow",
 				"typeProperties": {
 					"sources": [
