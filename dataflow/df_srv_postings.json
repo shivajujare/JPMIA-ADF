@@ -1,6 +1,9 @@
 {
 	"name": "df_srv_postings",
 	"properties": {
+		"folder": {
+			"name": "SRV_Dataflows"
+		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [

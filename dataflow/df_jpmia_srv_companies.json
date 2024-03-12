@@ -1,6 +1,9 @@
 {
 	"name": "df_jpmia_srv_companies",
 	"properties": {
+		"folder": {
+			"name": "SRV_Dataflows"
+		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [

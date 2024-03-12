@@ -90,6 +90,9 @@
 				"type": "String"
 			}
 		},
+		"folder": {
+			"name": "SRV_Pipeline"
+		},
 		"annotations": []
 	}
 }

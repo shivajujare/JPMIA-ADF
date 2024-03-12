@@ -65,6 +65,9 @@
 				}
 			}
 		],
+		"folder": {
+			"name": "SRV_Pipeline"
+		},
 		"annotations": []
 	}
 }

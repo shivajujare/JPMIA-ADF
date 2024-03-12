@@ -5,6 +5,9 @@
 			"referenceName": "ls_adls_jpmia",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "SRV_Datasets"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
