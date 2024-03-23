@@ -17,7 +17,7 @@
 					"value": "@concat('source_view/',replace(utcnow('d'),'/','-'))",
 					"type": "Expression"
 				},
-				"fileSystem": "jpmia"
+				"fileSystem": "jpmiadata"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\"",
