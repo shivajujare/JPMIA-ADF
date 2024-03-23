@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "adf-jpmia-dev"
 		},
+		"ls_jpmia_synapse_connectionString": {
+			"value": ""
+		},
 		"ls_adls_jpmia_properties_typeProperties_url": {
 			"value": "https://adlsjpmiadev.dfs.core.windows.net/"
 		},

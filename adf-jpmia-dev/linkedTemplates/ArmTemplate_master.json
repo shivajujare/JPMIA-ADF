@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adf-jpmia-dev"
 		},
+		"ls_jpmia_synapse_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_jpmia_synapse'"
+		},
 		"ls_adls_jpmia_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adlsjpmiadev.dfs.core.windows.net/"
@@ -45,6 +49,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"ls_jpmia_synapse_connectionString": {
+						"value": "[parameters('ls_jpmia_synapse_connectionString')]"
 					},
 					"ls_adls_jpmia_properties_typeProperties_url": {
 						"value": "[parameters('ls_adls_jpmia_properties_typeProperties_url')]"
