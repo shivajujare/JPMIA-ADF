@@ -13,6 +13,126 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/pl_BV_Refresh')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Source Folder Validation",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Jamia-dbws/BV/BV_Input_Validation"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_dbws_jpmia",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "output capture",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Source Folder Validation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "source_view_check",
+							"value": {
+								"value": "@activity('Source Folder Validation').output.runOutput\n",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Checkig Status",
+						"description": "Run BV Main if true or fail pipeline",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "output capture",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(variables('source_view_check'), trim('OK'))",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Fail1",
+									"type": "Fail",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"message": "All files are not received from source",
+										"errorCode": "Error 001:"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Execute Pipeline1",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "pl_dbws_main",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"srv_check": {
+						"type": "Boolean"
+					},
+					"source_view_check": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "jpmia-dbws/BV_Refresh"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ps_srv_maiin')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -89,126 +209,6 @@
 				},
 				"folder": {
 					"name": "SRV_Pipeline"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_BV_Refresh')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Source Folder Validation",
-						"type": "DatabricksNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/Jamia-dbws/BV/BV_Input_Validation"
-						},
-						"linkedServiceName": {
-							"referenceName": "ls_dbws_jpmia",
-							"type": "LinkedServiceReference"
-						}
-					},
-					{
-						"name": "output capture",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Source Folder Validation",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "source_view_check",
-							"value": {
-								"value": "@activity('Source Folder Validation').output.runOutput\n",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Checkig Status",
-						"description": "Run BV Main if true or fail pipeline",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "output capture",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@equals(variables('source_view_check'), true)",
-								"type": "Expression"
-							},
-							"ifFalseActivities": [
-								{
-									"name": "Fail1",
-									"type": "Fail",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"message": "All files are not received from source",
-										"errorCode": "Error 001:"
-									}
-								}
-							],
-							"ifTrueActivities": [
-								{
-									"name": "Execute Pipeline1",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"policy": {
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "pl_dbws_main",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"variables": {
-					"srv_check": {
-						"type": "Boolean"
-					},
-					"source_view_check": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "jpmia-dbws/BV_Refresh"
 				},
 				"annotations": []
 			},

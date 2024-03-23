@@ -14,6 +14,9 @@
 		"ls_adls_jpmia_properties_typeProperties_servicePrincipalId": {
 			"value": "4642e764-5d80-4e29-936b-59e06b8a16f4"
 		},
+		"ls_dbws_jpmia_properties_typeProperties_existingClusterId": {
+			"value": "0323-032337-hpl68pq3"
+		},
 		"ls_jpmia_synapse_properties_typeProperties_connectionString_secretName": {
 			"value": "synapse-jpmia-con-str"
 		},
@@ -22,9 +25,6 @@
 		},
 		"ls_referentials_properties_typeProperties_connectionString_secretName": {
 			"value": "sql-referential-con-str"
-		},
-		"ls_dbws_jpmia_properties_typeProperties_existingClusterId": {
-			"value": "0323-032337-hpl68pq3"
 		}
 	}
 }

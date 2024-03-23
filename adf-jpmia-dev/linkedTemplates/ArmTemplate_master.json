@@ -19,6 +19,10 @@
 			"type": "string",
 			"defaultValue": "4642e764-5d80-4e29-936b-59e06b8a16f4"
 		},
+		"ls_dbws_jpmia_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0323-032337-hpl68pq3"
+		},
 		"ls_jpmia_synapse_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "synapse-jpmia-con-str"
@@ -30,10 +34,6 @@
 		"ls_referentials_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "sql-referential-con-str"
-		},
-		"ls_dbws_jpmia_properties_typeProperties_existingClusterId": {
-			"type": "string",
-			"defaultValue": "0323-032337-hpl68pq3"
 		},
 		"containerUri": {
 			"type": "string",
@@ -74,14 +74,14 @@
 					"ls_adls_jpmia_properties_typeProperties_servicePrincipalId": {
 						"value": "[parameters('ls_adls_jpmia_properties_typeProperties_servicePrincipalId')]"
 					},
+					"ls_dbws_jpmia_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('ls_dbws_jpmia_properties_typeProperties_existingClusterId')]"
+					},
 					"ls_jpmia_synapse_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('ls_jpmia_synapse_properties_typeProperties_connectionString_secretName')]"
 					},
 					"ls_referentials_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('ls_referentials_properties_typeProperties_connectionString_secretName')]"
-					},
-					"ls_dbws_jpmia_properties_typeProperties_existingClusterId": {
-						"value": "[parameters('ls_dbws_jpmia_properties_typeProperties_existingClusterId')]"
 					}
 				}
 			},

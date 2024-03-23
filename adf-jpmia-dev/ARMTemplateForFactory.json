@@ -19,6 +19,10 @@
 			"type": "string",
 			"defaultValue": "4642e764-5d80-4e29-936b-59e06b8a16f4"
 		},
+		"ls_dbws_jpmia_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0323-032337-hpl68pq3"
+		},
 		"ls_jpmia_synapse_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "synapse-jpmia-con-str"
@@ -30,16 +34,248 @@
 		"ls_referentials_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "sql-referential-con-str"
-		},
-		"ls_dbws_jpmia_properties_typeProperties_existingClusterId": {
-			"type": "string",
-			"defaultValue": "0323-032337-hpl68pq3"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_BV_Refresh')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Source Folder Validation",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Jamia-dbws/BV/BV_Input_Validation"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_dbws_jpmia",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "output capture",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Source Folder Validation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "source_view_check",
+							"value": {
+								"value": "@activity('Source Folder Validation').output.runOutput\n",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Checkig Status",
+						"description": "Run BV Main if true or fail pipeline",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "output capture",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(variables('source_view_check'), trim('OK'))",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Fail1",
+									"type": "Fail",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"message": "All files are not received from source",
+										"errorCode": "Error 001:"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Execute Pipeline1",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "pl_dbws_main",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"srv_check": {
+						"type": "Boolean"
+					},
+					"source_view_check": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "jpmia-dbws/BV_Refresh"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_dbws_jpmia')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_dbws_main')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_Load_Report_Tables')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Stored procedure1",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[jpmia].[sp_LoadReportingTables]"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_jpmia_synapse",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "SynapseReports"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_jpmia_synapse')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_dbws_main')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Notebook1",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Jamia-dbws/BV/BV_Main"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_dbws_jpmia",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Execute Pipeline1",
+						"type": "ExecutePipeline",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "Notebook1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_dbws_postings",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"srv_check": {
+						"type": "Boolean"
+					},
+					"source_view_check": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "jpmia-dbws/BV_Refresh"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_dbws_jpmia')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_dbws_postings')]"
+			]
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pl_dbws_postings')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -145,45 +381,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_srv_postings_folder')]",
 				"[concat(variables('factoryId'), '/linkedServices/ls_dbws_jpmia')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_Load_Report_Tables')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Stored procedure1",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[jpmia].[sp_LoadReportingTables]"
-						},
-						"linkedServiceName": {
-							"referenceName": "ls_jpmia_synapse",
-							"type": "LinkedServiceReference"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "SynapseReports"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_jpmia_synapse')]"
 			]
 		},
 		{
@@ -457,9 +654,6 @@
 				"variables": {
 					"sss": {
 						"type": "String"
-					},
-					"srv_check": {
-						"type": "Boolean"
 					}
 				},
 				"folder": {
@@ -842,6 +1036,30 @@
 						},
 						"secretName": "sp-secret"
 					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_kv_jpmia')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_dbws_jpmia')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-7607077519063120.0.azuredatabricks.net",
+					"accessToken": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ls_kv_jpmia",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "dbws-access-token"
+					},
+					"existingClusterId": "[parameters('ls_dbws_jpmia_properties_typeProperties_existingClusterId')]"
 				}
 			},
 			"dependsOn": [
@@ -1242,227 +1460,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ds_jpmia_raw_companies')]",
 				"[concat(variables('factoryId'), '/datasets/ds_jpmia_source_view')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ls_dbws_jpmia')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureDatabricks",
-				"typeProperties": {
-					"domain": "https://adb-7607077519063120.0.azuredatabricks.net",
-					"accessToken": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ls_kv_jpmia",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "dbws-access-token"
-					},
-					"existingClusterId": "[parameters('ls_dbws_jpmia_properties_typeProperties_existingClusterId')]"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_kv_jpmia')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_dbws_main')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Notebook1",
-						"type": "DatabricksNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/Jamia-dbws/BV/BV_Main"
-						},
-						"linkedServiceName": {
-							"referenceName": "ls_dbws_jpmia",
-							"type": "LinkedServiceReference"
-						}
-					},
-					{
-						"name": "Execute Pipeline1",
-						"type": "ExecutePipeline",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [
-							{
-								"activity": "Notebook1",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "pl_dbws_postings",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"variables": {
-					"srv_check": {
-						"type": "Boolean"
-					},
-					"source_view_check": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "jpmia-dbws/BV_Refresh"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_dbws_jpmia')]",
-				"[concat(variables('factoryId'), '/pipelines/pl_dbws_postings')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/pl_BV_Refresh')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Source Folder Validation",
-						"type": "DatabricksNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebookPath": "/Jamia-dbws/BV/BV_Input_Validation"
-						},
-						"linkedServiceName": {
-							"referenceName": "ls_dbws_jpmia",
-							"type": "LinkedServiceReference"
-						}
-					},
-					{
-						"name": "output capture",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Source Folder Validation",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "source_view_check",
-							"value": {
-								"value": "@activity('Source Folder Validation').output.runOutput\n",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Checkig Status",
-						"description": "Run BV Main if true or fail pipeline",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "output capture",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@equals(variables('source_view_check'), true)",
-								"type": "Expression"
-							},
-							"ifFalseActivities": [
-								{
-									"name": "Fail1",
-									"type": "Fail",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"message": "All files are not received from source",
-										"errorCode": "Error 001:"
-									}
-								}
-							],
-							"ifTrueActivities": [
-								{
-									"name": "Execute Pipeline1",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"policy": {
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "pl_dbws_main",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"variables": {
-					"srv_check": {
-						"type": "Boolean"
-					},
-					"source_view_check": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "jpmia-dbws/BV_Refresh"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_dbws_jpmia')]",
-				"[concat(variables('factoryId'), '/pipelines/pl_dbws_main')]"
 			]
 		}
 	]
