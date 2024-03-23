@@ -10,7 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": "source_view/postings",
+				"fileName": "*postings.csv",
+				"folderPath": "source_view/",
 				"fileSystem": "jpmiadata"
 			},
 			"columnDelimiter": ",",
