@@ -1,0 +1,23 @@
+{
+	"name": "ds_srv_postings_folder",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adls_jpmia",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "source_view/postings",
+				"fileSystem": "jpmiadata"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": false,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
