@@ -1,12 +1,18 @@
 {
 	"name": "ls_jpmia_synapse",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"annotations": [],
 		"type": "AzureSqlDW",
 		"typeProperties": {
-			"connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=jpmia-synapse-analytics.sql.azuresynapse.net;initial catalog=JobPulse_MarketInsightAnalytics;user id=jpmia_admin",
-			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDRFN0VGODVELTM4MkItNEFBRS05MTc2LUVENTkzQTI3OEI4NV81ZmQ4NzRjMy04MjZmLTQ0Y2EtYmEzZC05N2M0MTVmZTE0ZmUiDQp9"
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_kv_jpmia",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "synapse-jpmia-con-str"
+			}
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }
