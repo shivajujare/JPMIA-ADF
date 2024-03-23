@@ -48,8 +48,16 @@
 				}
 			}
 		],
+		"variables": {
+			"srv_check": {
+				"type": "Boolean"
+			},
+			"source_view_check": {
+				"type": "String"
+			}
+		},
 		"folder": {
-			"name": "jpmia-dbws"
+			"name": "jpmia-dbws/BV_Refresh"
 		},
 		"annotations": []
 	}
