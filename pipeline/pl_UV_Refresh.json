@@ -1,0 +1,31 @@
+{
+	"name": "pl_UV_Refresh",
+	"properties": {
+		"activities": [
+			{
+				"name": "UV Main",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Jamia-dbws/UV/UV_Main"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_dbws_jpmia",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "jpmia-dbws/UV_Refresh"
+		},
+		"annotations": []
+	}
+}
