@@ -61,7 +61,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@equals(variables('source_view_check'), true)",
+						"value": "@equals(variables('source_view_check'), trim('OK'))",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
