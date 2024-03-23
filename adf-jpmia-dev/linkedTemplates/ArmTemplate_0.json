@@ -7,17 +7,25 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "adf-jpmia-dev"
 		},
-		"ls_jpmia_synapse_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'ls_jpmia_synapse'"
-		},
-		"ls_adls_jpmia_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://adlsjpmiadev.dfs.core.windows.net/"
-		},
 		"ls_kv_jpmia_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://kv-jpmia-dev.vault.azure.net/"
+		},
+		"ls_adls_jpmia_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsjpmia.dfs.core.windows.net/"
+		},
+		"ls_adls_jpmia_properties_typeProperties_tenant": {
+			"type": "string",
+			"defaultValue": "ba1b0bed-5b3e-4a44-8262-436ffcfc847d"
+		},
+		"ls_adls_jpmia_properties_typeProperties_servicePrincipalId": {
+			"type": "string",
+			"defaultValue": "4642e764-5d80-4e29-936b-59e06b8a16f4"
+		},
+		"ls_jpmia_synapse_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "synapse-jpmia-con-str"
 		},
 		"ls_referentials_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
@@ -28,32 +36,6 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/ls_adls_jpmia')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('ls_adls_jpmia_properties_typeProperties_url')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ls_jpmia_synapse')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDW",
-				"typeProperties": {
-					"connectionString": "[parameters('ls_jpmia_synapse_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ls_kv_jpmia')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -68,7 +50,77 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"name": "[concat(parameters('factoryName'), '/ls_adls_jpmia')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_adls_jpmia_properties_typeProperties_url')]",
+					"tenant": "[parameters('ls_adls_jpmia_properties_typeProperties_tenant')]",
+					"servicePrincipalId": "[parameters('ls_adls_jpmia_properties_typeProperties_servicePrincipalId')]",
+					"servicePrincipalCredentialType": "ServicePrincipalKey",
+					"servicePrincipalCredential": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ls_kv_jpmia",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "sp-secret"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_kv_jpmia')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_jpmia_synapse')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ls_kv_jpmia",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('ls_jpmia_synapse_properties_typeProperties_connectionString_secretName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_kv_jpmia')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_referentials')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ls_kv_jpmia",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('ls_referentials_properties_typeProperties_connectionString_secretName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_kv_jpmia')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_Load_Report_Tables')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -315,6 +367,34 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ds_srv_postings_folder')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_adls_jpmia",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "source_view/postings",
+						"fileSystem": "jpmiadata"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_adls_jpmia')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ds_test')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -343,25 +423,53 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ls_referentials')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "ls_kv_jpmia",
-							"type": "LinkedServiceReference"
+				"activities": [
+					{
+						"name": "Get Metadata1",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
 						},
-						"secretName": "[parameters('ls_referentials_properties_typeProperties_connectionString_secretName')]"
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ds_srv_postings_folder",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
 					}
-				}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "jpmia-dbws"
+				},
+				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_kv_jpmia')]"
+				"[concat(variables('factoryId'), '/datasets/ds_srv_postings_folder')]"
 			]
 		},
 		{

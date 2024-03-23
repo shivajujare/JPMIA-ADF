@@ -5,11 +5,17 @@
 		"factoryName": {
 			"value": "adf-jpmia-dev"
 		},
-		"ls_jpmia_synapse_connectionString": {
-			"value": ""
-		},
 		"ls_adls_jpmia_properties_typeProperties_url": {
-			"value": "https://adlsjpmiadev.dfs.core.windows.net/"
+			"value": "https://adlsjpmia.dfs.core.windows.net/"
+		},
+		"ls_adls_jpmia_properties_typeProperties_tenant": {
+			"value": "ba1b0bed-5b3e-4a44-8262-436ffcfc847d"
+		},
+		"ls_adls_jpmia_properties_typeProperties_servicePrincipalId": {
+			"value": "4642e764-5d80-4e29-936b-59e06b8a16f4"
+		},
+		"ls_jpmia_synapse_properties_typeProperties_connectionString_secretName": {
+			"value": "synapse-jpmia-con-str"
 		},
 		"ls_kv_jpmia_properties_typeProperties_baseUrl": {
 			"value": "https://kv-jpmia-dev.vault.azure.net/"
