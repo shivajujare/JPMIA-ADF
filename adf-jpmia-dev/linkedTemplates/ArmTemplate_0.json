@@ -30,6 +30,10 @@
 		"ls_referentials_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "sql-referential-con-str"
+		},
+		"ls_dbws_jpmia_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0323-032337-hpl68pq3"
 		}
 	},
 	"variables": {
@@ -113,6 +117,30 @@
 						},
 						"secretName": "[parameters('ls_referentials_properties_typeProperties_connectionString_secretName')]"
 					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_kv_jpmia')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_dbws_jpmia')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-7607077519063120.0.azuredatabricks.net",
+					"accessToken": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ls_kv_jpmia",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "dbws-access-token"
+					},
+					"existingClusterId": "[parameters('ls_dbws_jpmia_properties_typeProperties_existingClusterId')]"
 				}
 			},
 			"dependsOn": [
@@ -380,12 +408,12 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": "source_view/",
+						"folderPath": "source_view",
 						"fileSystem": "jpmiadata"
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\\",
-					"firstRowAsHeader": false,
+					"firstRowAsHeader": true,
 					"quoteChar": "\""
 				},
 				"schema": []
@@ -423,7 +451,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"name": "[concat(parameters('factoryName'), '/pl_dbws_postings')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -458,6 +486,54 @@
 								"type": "DelimitedTextReadSettings"
 							}
 						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Metadata1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Metadata1').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "dbricks postings",
+									"type": "DatabricksNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/Jamia-dbws/BV/BV_Postings",
+										"baseParameters": {
+											"file_name": {
+												"value": "@item().name",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "ls_dbws_jpmia",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
 					}
 				],
 				"policy": {
@@ -469,7 +545,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ds_srv_postings_folder')]"
+				"[concat(variables('factoryId'), '/datasets/ds_srv_postings_folder')]",
+				"[concat(variables('factoryId'), '/linkedServices/ls_dbws_jpmia')]"
 			]
 		},
 		{

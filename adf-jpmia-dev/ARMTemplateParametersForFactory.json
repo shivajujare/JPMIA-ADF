@@ -22,6 +22,9 @@
 		},
 		"ls_referentials_properties_typeProperties_connectionString_secretName": {
 			"value": "sql-referential-con-str"
+		},
+		"ls_dbws_jpmia_properties_typeProperties_existingClusterId": {
+			"value": "0323-032337-hpl68pq3"
 		}
 	}
 }
