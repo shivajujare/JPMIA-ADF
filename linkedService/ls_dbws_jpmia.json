@@ -1,0 +1,19 @@
+{
+	"name": "ls_dbws_jpmia",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-7607077519063120.0.azuredatabricks.net",
+			"accessToken": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_kv_jpmia",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "dbws-access-token"
+			},
+			"existingClusterId": "0323-032337-hpl68pq3"
+		}
+	}
+}
