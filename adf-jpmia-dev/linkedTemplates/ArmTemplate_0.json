@@ -1172,34 +1172,37 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/ps_srv_maiin')]",
+			"name": "[concat(parameters('factoryName'), '/pl_dbws_main')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Execute srv companies",
-						"type": "ExecutePipeline",
+						"name": "Notebook1",
+						"type": "DatabricksNotebook",
 						"dependsOn": [],
 						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
 							"secureInput": false
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"pipeline": {
-								"referenceName": "pl_srv_companies",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
+							"notebookPath": "/Jamia-dbws/BV/BV_Main"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_dbws_jpmia",
+							"type": "LinkedServiceReference"
 						}
 					},
 					{
-						"name": "Execute srv jobs",
+						"name": "Execute Pipeline1",
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "Execute srv companies",
+								"activity": "Notebook1",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1211,31 +1214,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "pl_srv_jobs",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "Execute srv postiings",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Execute srv jobs",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "pl_srv_job_postings",
+								"referenceName": "pl_dbws_postings",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
@@ -1247,14 +1226,13 @@
 					"elapsedTimeMetric": {}
 				},
 				"folder": {
-					"name": "SRV_Pipeline"
+					"name": "jpmia-dbws"
 				},
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/pl_srv_companies')]",
-				"[concat(variables('factoryId'), '/pipelines/pl_srv_jobs')]",
-				"[concat(variables('factoryId'), '/pipelines/pl_srv_job_postings')]"
+				"[concat(variables('factoryId'), '/linkedServices/ls_dbws_jpmia')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_dbws_postings')]"
 			]
 		}
 	]
