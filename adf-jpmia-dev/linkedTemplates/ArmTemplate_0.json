@@ -377,11 +377,8 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": {
-							"value": "@concat('source_view/',replace(utcnow('d'),'/','-'))",
-							"type": "Expression"
-						},
-						"fileSystem": "jpmia"
+						"folderPath": "source_view",
+						"fileSystem": "jpmiadata"
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\"",
@@ -402,6 +399,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SRV_Datasets"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
@@ -539,8 +539,16 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"variables": {
+					"srv_check": {
+						"type": "Boolean"
+					},
+					"source_view_check": {
+						"type": "String"
+					}
+				},
 				"folder": {
-					"name": "jpmia-dbws"
+					"name": "jpmia-dbws/BV_Refresh"
 				},
 				"annotations": []
 			},
@@ -1159,6 +1167,9 @@
 				"variables": {
 					"sss": {
 						"type": "String"
+					},
+					"srv_check": {
+						"type": "Boolean"
 					}
 				},
 				"folder": {
@@ -1200,6 +1211,8 @@
 					{
 						"name": "Execute Pipeline1",
 						"type": "ExecutePipeline",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "Notebook1",
@@ -1225,8 +1238,16 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"variables": {
+					"srv_check": {
+						"type": "Boolean"
+					},
+					"source_view_check": {
+						"type": "String"
+					}
+				},
 				"folder": {
-					"name": "jpmia-dbws"
+					"name": "jpmia-dbws/BV_Refresh"
 				},
 				"annotations": []
 			},

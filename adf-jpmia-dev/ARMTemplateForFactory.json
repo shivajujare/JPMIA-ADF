@@ -129,8 +129,16 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"variables": {
+					"srv_check": {
+						"type": "Boolean"
+					},
+					"source_view_check": {
+						"type": "String"
+					}
+				},
 				"folder": {
-					"name": "jpmia-dbws"
+					"name": "jpmia-dbws/BV_Refresh"
 				},
 				"annotations": []
 			},
@@ -449,6 +457,9 @@
 				"variables": {
 					"sss": {
 						"type": "String"
+					},
+					"srv_check": {
+						"type": "Boolean"
 					}
 				},
 				"folder": {
@@ -738,11 +749,8 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": {
-							"value": "@concat('source_view/',replace(utcnow('d'),'/','-'))",
-							"type": "Expression"
-						},
-						"fileSystem": "jpmia"
+						"folderPath": "source_view",
+						"fileSystem": "jpmiadata"
 					},
 					"columnDelimiter": ",",
 					"escapeChar": "\"",
@@ -763,6 +771,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_adls_jpmia",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SRV_Datasets"
 				},
 				"annotations": [],
 				"type": "DelimitedText",
@@ -1286,6 +1297,8 @@
 					{
 						"name": "Execute Pipeline1",
 						"type": "ExecutePipeline",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "Notebook1",
@@ -1311,14 +1324,145 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"variables": {
+					"srv_check": {
+						"type": "Boolean"
+					},
+					"source_view_check": {
+						"type": "String"
+					}
+				},
 				"folder": {
-					"name": "jpmia-dbws"
+					"name": "jpmia-dbws/BV_Refresh"
 				},
 				"annotations": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_dbws_jpmia')]",
 				"[concat(variables('factoryId'), '/pipelines/pl_dbws_postings')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_BV_Refresh')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Source Folder Validation",
+						"type": "DatabricksNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/Jamia-dbws/BV/BV_Input_Validation"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_dbws_jpmia",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "output capture",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Source Folder Validation",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "source_view_check",
+							"value": {
+								"value": "@activity('Source Folder Validation').output.runOutput\n",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Checkig Status",
+						"description": "Run BV Main if true or fail pipeline",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "output capture",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(variables('source_view_check'), true)",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Fail1",
+									"type": "Fail",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"message": "All files are not received from source",
+										"errorCode": "Error 001:"
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Execute Pipeline1",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "pl_dbws_main",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"srv_check": {
+						"type": "Boolean"
+					},
+					"source_view_check": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "jpmia-dbws/BV_Refresh"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_dbws_jpmia')]",
+				"[concat(variables('factoryId'), '/pipelines/pl_dbws_main')]"
 			]
 		}
 	]
