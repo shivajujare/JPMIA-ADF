@@ -716,7 +716,6 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "*postings.csv",
 						"folderPath": "source_view/",
 						"fileSystem": "jpmiadata"
 					},
